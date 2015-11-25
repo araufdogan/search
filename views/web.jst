@@ -1,0 +1,453 @@
+{{
+    function isYoutube(url){
+        var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
+        var match = url.match(regExp);
+        return (match&&match[7].length==11)? match[7] : false;
+    }
+}}
+
+
+{{
+    function urlDecode(url){
+        try {
+            return decodeURIComponent(url);
+        } catch(e) {
+            return url;
+        }
+    }
+}}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{=it.q + " - " + it.__("SEARCH")}}</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title="">
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <meta content="always" name="referrer">
+    <link rel="stylesheet" type="text/css" href="css/styler.css">
+    <script type="text/javascript" src="/js/jquery-2.0.2.min.js"></script>
+    <script>
+        $(function(){
+            var u = $("#suggest-align"),
+                a = $(".ac_wrap"),
+                m = $(".ac_menu"),
+                f = $("#head form"),
+                i = $("#keyword"),
+                x = null,
+                s = "";
+                w = "";
+                ai = -1;
+
+            f.on("submit", function() {
+                if ($.trim(i.val()) == "") return i.focus(), !1
+            });
+            
+            m.on("mouseover", "li", function() {
+                $(this).addClass("selected");
+                s = $(this).attr("acvalue");
+                i.val($(this).attr("acvalue"));
+            });
+            
+            m.on("mouseout", "li", function() {
+                $(this).removeClass("selected");
+                i.val(w);
+                s = "";
+            });
+            
+            m.on("click", "li", function(){
+                f.submit();
+                a.hide();
+            });
+
+            i.on({
+                focus: function() {
+                    u.addClass("focus");
+                    if ($.trim(i.val()) != "" && a.find("li").length) { 
+                        a.show();
+                    }
+                },
+                blur: function() {
+                    u.removeClass("focus");
+                    if (s == "") {
+                        a.hide();
+                    }
+                }, 
+                keydown: function(e) {
+                    var t = e.keyCode || e.which;
+                    if (t === 13) {
+                        
+                    } else if (t === 38) {
+                        if (a.find("li").length == 0) return;
+                        if (ai == -1) return;
+                        
+                        var el = $("li[ac_index='" + ai + "']");
+                        el.removeClass("selected");
+
+                        ai--;
+                        
+                        var el = $("li[ac_index='" + ai + "']");
+                        el.addClass("selected");
+                        s = el.attr("acvalue");
+                        i.val(el.attr("acvalue"));
+                        e.preventDefault();
+                        return false;
+                        
+                    } else if (t === 40) {
+                        if (a.find("li").length == 0) return;
+                        if (ai == a.find("li").length - 1) return;
+                        
+                        var el = $("li[ac_index='" + ai + "']");
+                        el.removeClass("selected");
+
+                        ai++;
+                        
+                        var el = $("li[ac_index='" + ai + "']");
+                        el.addClass("selected");
+                        s = el.attr("acvalue");
+                        i.val(el.attr("acvalue"));
+                        e.preventDefault();
+                        return false;
+                    }
+                },
+                input: function() {
+                    w = $.trim($(this).val());
+                    if (x != null) x.abort();
+                    if (w != "") {
+                        x = $.ajax({
+                            type: "GET",
+                            url: "/autocomplete?q=" + encodeURIComponent(w) + "&e={{=it.user.e}}",
+                            success: function(r) {
+                                m.empty();
+                                var ir = 0;
+                                r.forEach(function(re){
+                                    m.append('<li ac_index="' + ir + '" acvalue="' + re + '">' + re + '</li>');
+                                    ir++;
+                                });
+                                if (ir > 0) { 
+                                    a.show();
+                                }
+                            }
+                        });
+                    } else {
+                        s = "";
+                        m.empty();
+                        a.hide();
+                    }
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div id="header">
+    <div class="inner">
+        <div id="h-hd">
+            <div id="h-hd-nav">
+                <div class="h-hd-logo">
+                    <a href="/"></a>
+                </div>
+                    <ul id="h-hd-tabs">
+                       <li><a href="/news?e={{=it.user.e}}">{{=it.__("NEWS")}}</a></li>
+                       <li class="h-hd-cur"><a href="#">{{=it.__("WEB")}}</a></li>
+                    </ul>
+            </div>
+        </div>
+        <div id="head">
+            <form class="form" method="GET" action="/web">
+                <div class="ac_wrap" style="min-width: 540px; top: 35px; left: 0px; display: none;">
+                    <div class="ac_wrap_inner">
+                        <div class="ac_menu_ctn">
+                            <div id="ac_one"></div>
+                            <ul class="ac_menu"></ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <span id="suggest-align" class="round">
+                    <input type="text" id="keyword" name="q" tabindex="1" class="input_key" value="{{=it.q}}" maxlength="100" autocomplete="off">
+                </span><input type="submit" tabindex="3" id="su" value={{=it.__("SEARCH")}} class="s_btn">
+                
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="warper">
+    <div id="container">
+        <div id="main">
+        
+            {{? it.didyoumean.length != 0}}
+            <!-- You asked for -->
+            <div class="m-corr" style="margin:-6px 0px 18px 0px; *position:relative; *z-index:0;">
+                <strong class="f14">{{=it.__("DIDYOUMEAN")}}: <span class="hc"><a href="/web?q={{=encodeURIComponent(it.didyoumean[0])}}&e={{=it.user.e}}">{{=it.didyoumean[0]}}</a></span></strong>
+            </div>
+            <!-- ## You asked for ##-->
+            {{?}}
+            
+            {{? it.suggestions.length != 0}}
+            <!-- Recommended searches -->
+            <div id="hs_top"}}>
+                <div class="hs-pdr" id="hs-pdr-guide">
+                    <div>{{=it.__("RELATEDSEARCHES")}}：</div>
+                    <div class="hs-pdr-bd">
+                        <span class="hs-pdr-box">
+                            {{ it.suggestions.forEach(function(s) { }}
+                                <a href="/web?q={{=encodeURIComponent(s)}}&e={{=it.user.e}}">{{=s}}</a>
+                            {{ }); }}
+                        </span>
+                    </div>
+                </div>
+            </div> 
+            <!-- ## Recommended searches ## -->
+            {{?}}
+            
+            {{? it.calculator != null }}
+                <!-- Calculator -->
+                <div id="mohe-calculator" class="g-mohe">
+                    <div class="cont">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="img"><img width="64" height="64" src="/img/cyehGfu6344.png"></div>
+                                    </td>
+                                    <td>
+                                        <div class="txt">
+                                            <p class="name">{{=it.__("CALCULATOR")}}</p>
+                                            {{?it.q.substr(-1) === "="}}
+                                            <p class="number">{{=it.q + " " + it.calculator}}</p>
+                                            {{??}}
+                                            <p class="number">{{=it.q + " = " + it.calculator}}</p>
+                                            {{?}}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- ##Calculator## -->
+            {{?}}
+            
+            
+            {{? it.converter != null }}
+                <!-- Converter -->
+                <div id="mohe-converter" class="g-mohe">
+                    <div class="cont">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="img"><img width="64" height="64" src="/img/cyehGfu6344.png"></div>
+                                    </td>
+                                    <td>
+                                        <div class="txt">
+                                            <p class="name">{{=it.converter.converter.fromValue + " " + it.converter.converter.fromUnit.shown[it.cookies.language]}}</p>
+                                            <p class="number">{{=it.converter.result.toFixed(3) + " " + it.converter.converter.toUnit.shown[it.cookies.language]}}</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- ##Converter## -->
+            {{?}}
+            
+            <!-- Result List -->
+            <ul id="m-result" class="result">
+                {{? it.results.length == 0 }}
+                    {{=it.__("NORESULT", it.q)}}
+                {{?}}
+                
+                {{?it.images != null && it.images.length > 0 && it.wiki == null && it.imagespreview == true}}
+                    <!-- Images Preview -->
+                    <li class="res-list">
+                        <h3 class="res-title">
+                            <a href="#">
+                                {{=it.__("IMAGESPREVIEW", it.q)}}
+                            </a>
+                        </h3>
+                        <div class="res-rich hs-rich-news clearfix">
+                            <div class="pics clearfix">
+                                <ul>
+                                    {{it.images.forEach(function(image, i) {}}
+                                        {{?i > 4}}
+                                            {{return;}}
+                                        {{?}}
+                                        <li>
+                                            <a href="{{=image.url}}">
+                                                <img width="100" height="100" src="/imgres?source={{=encodeURIComponent(image.key)}}&h=100&w=100">
+                                            </a>
+                                        </li>
+                                    {{});}}
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                    <!-- Video Preview -->
+                {{?}}
+                
+                {{?it.newspreview == true}}
+                    
+                {{?}}
+                
+                {{ it.results.forEach(function(r) { }}
+                    
+                    {{?isYoutube(r.data.url)}}
+                        <!-- Video Result -->
+                        <li class="res-list">
+                            <h3 class="res-title"><a href="{{=r.data.url}}">{{=r.data.title_html}}</a></h3>
+                            <div class="res-rich hs-rich-svideo clearfix">
+                                <div class="res-comm-img">
+                                    <a href="{{=r.data.url}}" class="video-pic" target="_blank">
+                                        <img src="http://img.youtube.com/vi/{{=isYoutube(r.data.url)}}/0.jpg">
+                                        <!--
+                                        <span class="video-time"><span>#:#</span></span>
+                                        -->
+                                    </a>
+                                </div>
+                                <div class="res-comm-con">
+                                    <p class="video-ext"></p>
+                                    {{=r.data.content_html}}
+                                    <p class="res-linkinfo"><cite>{{=urlDecode(r.data.url)}}</cite></p>
+                                </div>
+                            </div>
+                        </li>
+                        <!-- ##Video Result## -->
+                    {{??}}
+                        <!-- Text Result -->
+                        <li class="res-list">
+                            <h3 class="res-title"><a href="{{=r.data.url}}">{{=r.data.title_html}}</a></h3>
+                            <p class="res-desc" {{? r.data.content_html.length == 0}} style="display: none;" {{?}}>
+                                {{=r.data.content_html}}
+                                <br>
+                            </p>
+                            <p class="res-linkinfo"><cite>{{=urlDecode(r.data.url)}}</cite></p>
+                        </li>
+                        <!-- ## Text Result ## -->
+                    {{?}}
+
+                {{ }); }}
+            </ul>
+            <!-- ## Result List ##-->
+            
+            <!-- Paging -->
+           
+            <div id="page">
+                {{?it.p > 1}}
+                    <a id="sback" href="/web?q={{=encodeURIComponent(it.q)}}&p={{=it.p - 1}}&e={{=it.user.e}}">Back</a>
+                {{?}}
+
+                {{?it.results.length > 0}}
+                    <a id="snext" href="/web?q={{=encodeURIComponent(it.q)}}&p={{=it.p + 1}}&e={{=it.user.e}}">Next</a>
+                {{?}}
+                
+                <span class="nums" style="margin-left:20px"></span>
+            </div>
+            <!-- ## Paging ## -->
+            
+        </div>
+    
+        <div id="side" style="z-index: 1;">
+            {{?it.wiki != null}}
+                {{?it.wiki.type == "/people/person" && it.wiki.name != null && it.wiki.description != null}}
+                    <div id="mohe-wiki">
+                        <p class="wiki-images">
+                            {{ var ilen = 0; }}
+                            {{ it.images.forEach(function(image){ }}
+                                {{?ilen > 6}} 
+                                    {{return;}}
+                                {{?}}
+                                {{?ilen == 0}}
+                                    <img width= "100" height= "100" src="/imgres?source={{=encodeURIComponent(image.key)}}&h=100&w=100">
+                                {{?? ilen == 1}}
+                                    <img width= "50" height= "100" src="/imgres?source={{=encodeURIComponent(image.key)}}&h=100&w=50">
+                                {{?? ilen == 2}}
+                                    <img width= "50" height= "100" src="/imgres?source={{=encodeURIComponent(image.key)}}&h=100&w=50">
+                                {{?? ilen == 3}}
+                                    <img width= "50" height= "100" src="/imgres?source={{=encodeURIComponent(image.key)}}&h=100&w=50">
+                                {{?? ilen == 4}}
+                                    <img width= "50" height= "100" src="/imgres?source={{=encodeURIComponent(image.key)}}&h=100&w=50">
+                                {{?? ilen == 5}}
+                                    <img width= "50" height= "100" src="/imgres?source={{=encodeURIComponent(image.key)}}&h=100&w=50">
+                                {{?? ilen == 6}}
+                                    <img width= "50" height= "100" src="/imgres?source={{=encodeURIComponent(image.key)}}&h=100&w=50">
+                                {{?}}
+                                {{ilen++;}}
+                            {{ }); }}
+                        </p>
+                        <div style="clear: both;"></div>
+                        <div class="wiki-social">
+                            {{ it.wiki.social_media_presence.forEach(function(social){ }}
+                                {{?social.type == "facebook"}}
+                                    <a href="{{=social.url}}"><img src="/img/favicons/facebook.png"></a>
+                                {{??social.type == "twitter"}}
+                                    <a href="{{=social.url}}"><img src="/img/favicons/twitter.png"></a>
+                                {{??social.type == "googleplus"}}
+                                    <a href="{{=social.url}}"><img src="/img/favicons/google_plus.png"></a>
+                                {{??social.type == "instagram"}}
+                                    <a href="{{=social.url}}"><img src="/img/favicons/instagram.png"></a>
+                                {{?}}
+                            {{ }); }}
+                        </div>
+                        <p class="wiki-title">{{=it.wiki.name}}</p>
+                        <p class="wiki-small">{{?it.wiki.notable_type != null}} {{=it.wiki.notable_type}} {{?}}</p>
+                        <p class="wiki-content">{{=it.wiki.description}} <a href="{{=it.wiki.wikipedia}}">{{=it.__("WIKIPEDIA")}}</a></p>
+                        {{?it.wiki.date_of_birth != null}}
+                            <p class="wiki-property"><b>Doğum: </b>{{=it.wiki.date_of_birth}} 
+                            {{?it.wiki.place_of_birth != null}}
+                                <a href="/web?q={{=encodeURIComponent(it.wiki.place_of_birth)}}&e={{=it.user.e}}">{{=it.wiki.place_of_birth}}</a>
+                            {{?}}
+                            </p>
+                        {{?}}
+                        
+                        {{?it.wiki.date_of_death != null}}
+                            <p class="wiki-property"><b>Ölüm: </b>{{=it.wiki.date_of_death}} 
+                            {{?it.wiki.place_of_death != null}}
+                                <a href="/web?q={{=encodeURIComponent(it.wiki.place_of_death)}}&e={{=it.user.e}}">{{=it.wiki.place_of_death}}</a>
+                            {{?}}
+                            </p>
+                        {{?}}
+                        
+                        {{?it.wiki.children.length > 0}}
+                            <p class="wiki-property"><b>Çocukları: </b>
+                            {{ it.wiki.children.forEach(function(c, i){ }}
+                                <a href="/web?q={{=encodeURIComponent(c)}}&e={{=it.user.e}}">{{=c}}</a>
+                                {{?i < it.wiki.children.length - 1 }}
+                                    {{=", "}}
+                                {{?}}
+                            {{ }); }}
+                            </p>
+                        {{?}}
+
+                        {{?it.wiki.parents.length > 0}}
+                            <p class="wiki-property"><b>Ebeveyinleri: </b>
+                            {{ it.wiki.parents.forEach(function(c, i){ }}
+                                <a href="/web?q={{=encodeURIComponent(c)}}&e={{=it.user.e}}">{{=c}}</a>
+                                {{?i < it.wiki.parents.length - 1 }}
+                                    {{=", "}}
+                                {{?}}
+                            {{ }); }}
+                            </p>
+                        {{?}}
+                    </div>
+                {{?}}
+            {{?}}
+        </div>
+        
+        <div style="clear:both;"></div>
+    </div>
+</div>
+
+<div id="footer">
+    <a href="#" target="_blank">Engine</a>|
+    <span>Copyright © </span>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+	"SEARCH": "Ara",
+	"NEWS": "Haberler",
+	"WEB": "Web",
+	"IMAGES": "Resimler",
+	"VIDEOS": "Videolar",
+	"SOCIAL": "Sosyal",
+	"MAPS": "Haritalar",
+	"DIDYOUMEAN": "Bunu mu aradınız",
+	"RELATEDSEARCHES": "İlgili aramalar",
+	"CALCULATOR": "Hesap Makinesi",
+	"NORESULT": "<b>%s</b> - ile ilgili arama sonucu mevcut değil.",
+	"WIKIPEDIA": "Vikipedi",
+	"IMAGESPREVIEW": "<b>%s</b> ile ilgili görseller"
+}

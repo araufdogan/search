@@ -1,0 +1,15 @@
+{
+	"SEARCH": "Search",
+	"NEWS": "News",
+	"WEB": "Web",
+	"IMAGES": "Images",
+	"VIDEOS": "Videos",
+	"SOCIAL": "Social",
+	"MAPS": "Maps",
+	"DIDYOUMEAN": "Did you mean",
+	"RELATEDSEARCHES": "Related searches",
+	"CALCULATOR": "Calculator",
+	"NORESULT": "No results found for %s.",
+	"WIKIPEDIA": "Wikipedia",
+	"IMAGESPREVIEW": "Images for <b>%s</b>"
+}
