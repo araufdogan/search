@@ -176,7 +176,3 @@ function parse_url(url_string, google_hostname) {
 function stringStartsWith (string, prefix) {
     return string.slice(0, prefix.length) == prefix;
 }
-
-this.search("google", true, "tr-TR", 1, function(){
-    
-});
