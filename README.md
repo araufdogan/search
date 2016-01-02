@@ -1,7 +1,7 @@
 # search
 another meta search engine
 <br />
-add your freebase api key in freebase.js
+add your freebase api key in freebase.js, edit your redis server ip port in app.js
 <br />
 search<br />
 ![search](https://raw.githubusercontent.com/araufdogan/search/master/search.png)<br />
