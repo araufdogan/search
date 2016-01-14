@@ -171,7 +171,7 @@ function get_google_pref_cookie() {
 function get_google_nid_cookie(google_hostname) {
 	if (nid_cookie[google_hostname]) { return nid_cookie[google_hostname]; }
 	var res = sync_request('GET', 'https://' + google_hostname);
-	nid_cookie[google_hostname] = res['headers']['set-cookie'][1].split(';')[0];
+	nid_cookie[google_hostname] = res['headers']['set-cookie'][0].split(';')[0];
 	return nid_cookie[google_hostname];
 }
 
