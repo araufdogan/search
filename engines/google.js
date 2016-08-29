@@ -123,7 +123,7 @@ exports.search = function(query, use_locale_domain, language, page, callback) {
 	request(options, function(error, response, body){
 		if (!error && response.statusCode == 200) {
 			var $ = cheerio.load(body);
-			$('li.g').each(function(i, element){
+			$('div.g').each(function(i, element){
 			    var title = $(this).find('h3 a').text() || '';
 				var title_html = $(this).find('h3 a').html() || '';
 				var url = $(this).find('h3 a').attr('href') || '';
